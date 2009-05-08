@@ -1,0 +1,4 @@
+; $Id$
+name = Menu clone
+description = Allows user to copy a menu and all of its items.
+core = 6.x
