@@ -1,66 +1,125 @@
 <?php
 // $Id$
 
-function menu_clone_form_menu_edit_menu_alter(&$form, $form_state) {
-	if ($form['menu_name']['#type'] === 'textfield') {
-		// If we're editing a currently-existing menu instead of creating a new one,
-		// the '#type' will be 'value'.
-		// Load menus
-		$rez = db_query('SELECT menu_name, title FROM {menu_custom} ORDER BY title ASC');
-		$menus = array('<none>' => t('Do not clone a menu'));
-		while ($menu = db_fetch_array($rez)) {
-			$menus[$menu['menu_name']] = t('@title (@name)', array('@title' => $menu['title'], '@name' => $menu['menu_name']));
-		}
-		
-		$form['parent'] = array(
-			'#title' => t('Clone menu'),
-			'#description' => t('If a menu is chosen, the new menu will be populated with copies of the menu items in this menu.'),
-			'#type' => 'select',
-			'#options' => $menus,
-			'#weight' => -10,
-		);
-		
-		if (isset($form['#submit'])) {
-			$form['#submit'][] = 'menu_clone_clone';
-		}
-		else {
-			$form['#submit'] = array('menu_clone_clone');
-		}
-	}
+/**
+ * Implementation of hook_help().
+ */
+function menu_clone_help($path, $arg) {
+  $output = '';
+  switch ($path) {
+    case 'admin/help#menu_clone':
+      $output = '<p>'. t('This module provides you with the ability to clone complete menus, much like <a href="@node_clone">Node Clone</a> does with nodes. The module adds a <em>Clone menu</em> tab to every <a href="@detail_page">detail page</a> of a menu. Clicking on the <em>Clone menu</em> tab brings you to the <a href="@menu_clone_detail">menu clone page</a>, displaying all settings needed to properly create a clone of this menu.', array('@detail_page' => url('admin/build/menu-customize/navigation'), '@node_clone' => 'http://drupal.org/project/node_clone', '@menu_clone_detail' => url('admin/build/menu-customize/navigation/clone'))) .'</p>';
+      $output .= '<p>'. t('The optional <em><a href="@i18n">Internationalization</a></em> (i18n) module together with the i18n submodule <em>Menu translation</em> will activate additional Language options.', array('@i18n' => 'http://drupal.org/project/i18n')) .'</p>';
+      $output .= '<p>'. t('The module provides inline help topics. For further info, read the help on the <a href="@menu_clone">menu clone page</a>.', array('@menu_clone' => url('admin/build/menu-customize/navigation/clone'))) .'</p>';
+      break;
+    case 'admin/build/menu-customize/%/clone':
+      $output = '<p>'. t('Next to the basic menu properties such as <em>Menu name</em>, <em>Title</em> and <em>Description</em>, this form allows you to customise the menu itself before cloning it.') .'</p>';
+      $output .= '<p>';
+      $output .= t('The optional <em><a href="@i18n">Internationalization</a></em> (i18n) module together with the i18n submodule <em>Menu translation</em> will activate the <em>Change language</em> option. This select box allows you to change the language of <em>all</em> menu items during the cloning process.', array('@i18n' => 'http://drupal.org/project/i18n'));
+      if (module_exists('i18n') && !module_exists('i18nmenu')) {
+        $output .= '<br />'. t('<strong>NOTE</strong>: You <em>do</em> have the <em><a href="@i18n">Internationalization</a></em> module installed, but the <em>Menu translation</em> submodule is not enabled. You can enable it on the <a href="@modules">modules page</a>.', array('@i18n' => 'http://drupal.org/project/i18n', '@modules' => url('admin/build/modules')));
+      }
+      else if(!module_exists('i18n')) {
+        $output .= '<br />'. t('<strong>NOTE</strong>: You <em>do not</em> have the <em><a href="@i18n">Internationalization</a></em> module installed or enabled, you can download it from the <a href="@i18n">project page</a> and enable it on the <a href="@modules">modules page</a>.', array('@i18n' => 'http://drupal.org/project/i18n', '@modules' => url('admin/build/modules')));
+      }
+      $output .= '</p>';
+      $output .= '<p>'. t('In <em>Edit Menu</em> you can customise the menu tree before cloning it. Next to the <em>Enabled</em> and <em>Expanded</em> checkboxes, the menu tree can be rearranged as well. To rearrange menu items, grab a drag-and-drop handle under the <em>Menu item</em> column and drag the items (or group of items) to a new location in the list. (Grab a handle by clicking and holding the mouse while hovering over a handle icon.<br />Everything under the <em>Ignore</em> row will <em>not</em> be copied over to the new menu. It does not matter on what depth the <em>Ignore</em> row resides, <em>everything</em> below it will simply be ignored.') .'</p>';
+      break;
+  }
+  return $output;
 }
 
-function menu_clone_clone($form, &$form_state) {
-	if ($form_state['values']['parent'] !== '<none>') {
-		$rez = db_query('SELECT mlid FROM {menu_links} WHERE menu_name = "%s"', array($form_state['values']['parent']));
-		$menu = array();
-		$menu_name = 'menu-' . $form_state['values']['menu_name'];
-		while ($mlid = db_fetch_array($rez)) {
-			$mi = menu_link_load($mlid['mlid']);
-			$mi['depth'] = intval($mi['depth']);
-			if ($mi['depth'] === 1) {
-				// menu_name will be automatically reset for us at depths beyond 1
-				$mi['menu_name'] = 'menu-' . $form_state['values']['menu_name'];
-			}
-			$menu[] = $mi;
-		}
-		for ($depth = 1; $depth < 10; $depth++) {
-			$new_mlids = array();
-			$next_depth = $depth + 1;
-			foreach ($menu as &$mi) {
-				// Save the items at this depth
-				if ($mi['depth'] === $depth) {
-					$mi['old_mlid'] = $mi['mlid'];
-					$mi['menu_name'] = $menu_name;
-					unset($mi['mlid']);
-					menu_link_save($mi);
-					$new_mlids[$mi['old_mlid']] = $mi['mlid'];
-				}
-				elseif ($mi['depth'] === $next_depth) {
-					// Update plids on next level of items
-					$mi['plid'] = $new_mlids[$mi['plid']];
-				}
-			}
-		}
-		drupal_set_message(t('The new menu has been populated with menu items from the parent menu.')); 
-	}
+/**
+ * Implementation of hook_perm().
+ */
+function menu_clone_perm() {
+  return array('access menu clone');
+}
+
+/**
+ *  Implementation of hook_menu().
+ */
+function menu_clone_menu() {
+  $items = array();
+
+  $items['admin/build/menu-customize/%menu_clone/clone'] = array(
+    'title' => t('Clone menu'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('menu_clone_clone_form', 3),
+    'access arguments' => array('access clone menu'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/menu_clone.admin.inc',
+    'weight' => 20,
+  );
+  
+  return $items;
+}
+
+/**
+ * Implemenation of hook_theme().
+ */
+function menu_clone_theme() {
+  return array(
+    'menu_clone_clone_form' => array(
+      'file' => 'includes/menu_clone.admin.inc',
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_load()
+ * We create a new menu name for the menu being cloned and check if this name is
+ * unique. If not unique, add a number to the 'clone_' prefix and retry.
+ * Next we get the full menu tree data, using part of the menu_overview_form()
+ * function from the Drupal core Menu module.
+ * 
+ * @param  menu_name machine-readable name of menu being cloned
+ * @return           an associative array containing all the menu info
+ * @see              _menu_clone_overview_tree_form()
+ * @see              Drupal core menu.admin.inc menu_tree_data()
+ * 
+ * TODO: Check why this one is also seems to be executed on
+ *       admin/build/menu-customize/<menu_name> (without the trailing /clone)
+ */
+function menu_clone_load($menu_name) {
+  global $menu_admin;
+
+  // Get basic menu data.
+  $menu = db_fetch_array(db_query("SELECT * FROM {menu_custom} WHERE menu_name = '%s'", $menu_name));
+  // Create a unique name
+  // Remove 'menu-' prefix if there is any.
+  if (strpos($menu['menu_name'], 'menu-') === 0){
+    $menu['menu_name'] = substr($menu['menu_name'],5);
+  }
+  $new_name = substr('clone-' . $menu['menu_name'], 0, MENU_MAX_MENU_NAME_LENGTH_UI);
+  $sql = "SELECT menu_name FROM {menu_custom} WHERE menu_name = '%s'";
+  $result = db_result(db_query($sql, 'menu-' . $new_name));
+  $i = 1;
+  while(!empty($result)) {
+    $new_name = substr('clone' . $i . '-' . $menu['menu_name'], 0, MENU_MAX_MENU_NAME_LENGTH_UI);
+    $result = db_result(db_query($sql, 'menu-' . $new_name));
+  }
+
+  // Begin code taken from menu_overview_form().
+  $sql = "
+    SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
+    FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
+    WHERE ml.menu_name = '%s'
+    ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
+  $result = db_query($sql, $menu_name);
+  $tree = menu_tree_data($result);
+  $node_links = array();
+  menu_tree_collect_node_links($tree, $node_links);
+  // We indicate that a menu administrator is running the menu access check.
+  $menu_admin = TRUE;
+  menu_tree_check_access($tree, $node_links);
+  $menu_admin = FALSE;
+  // End code taken from menu_overview_form().
+
+  // Set new unique name.
+  $menu['menu_name'] = $new_name;
+  $menu['title'] = t('Clone of') . ' '. $menu['title'];
+  $menu['tree'] = $tree;
+  return $menu;
 }
