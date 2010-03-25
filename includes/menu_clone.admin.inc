@@ -41,7 +41,7 @@ function menu_clone_clone_form(&$form_state, $menu){
       '#tree' => TRUE,
     );
     if (module_exists('i18nmenu')) {
-      $form['edit_menu']['menu_lang'] = array(menu_clone_clone_form
+      $form['edit_menu']['menu_lang'] = array(
         '#type' => 'select',
         '#title' => t('Change language'),
         '#description' => t('You can globally change the language of <em>all</em> the available menu items.'),
