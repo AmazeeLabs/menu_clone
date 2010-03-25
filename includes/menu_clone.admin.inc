@@ -80,7 +80,7 @@ function _menu_clone_tree_form($tree) {
     $item = $data['link'];
     // Don't show callbacks; these have $item['hidden'] < 0.
     if ($item && $item['hidden'] >= 0) {
-      $mlid = 'mlid:'. $item['mlid'];menu_clone_clone_form
+      $mlid = 'mlid:'. $item['mlid'];
       $form[$mlid]['#item'] = $item;
       $form[$mlid]['#attributes'] = $item['hidden'] ? array('class' => 'menu-disabled') : array('class' => 'menu-enabled');
       $form[$mlid]['title']['#value'] = l($item['title'], $item['href'], $item['localized_options']) . ($item['hidden'] ? ' ('. t('disabled') .')' : '');
