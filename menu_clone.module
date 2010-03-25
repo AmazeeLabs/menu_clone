@@ -70,13 +70,13 @@ function menu_clone_theme() {
 /**
  * Implementation of hook_load()
  * We create a new menu name for the menu being cloned and check if this name is
- * unique. If not unique, add a number to the 'clone_' prefix and retry.
+ * unique. If not unique, add a number to the 'clone-' prefix and retry.
  * Next we get the full menu tree data, using part of the menu_overview_form()
  * function from the Drupal core Menu module.
  * 
  * @param  menu_name machine-readable name of menu being cloned
  * @return           an associative array containing all the menu info
- * @see              _menu_clone_overview_tree_form()
+ * @see              menu_clone_clone_form()
  * @see              Drupal core menu.admin.inc menu_tree_data()
  * 
  * TODO: Check why this one is also seems to be executed on

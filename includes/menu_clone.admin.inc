@@ -41,7 +41,7 @@ function menu_clone_clone_form(&$form_state, $menu){
       '#tree' => TRUE,
     );
     if (module_exists('i18nmenu')) {
-      $form['edit_menu']['menu_lang'] = array(
+      $form['edit_menu']['menu_lang'] = array(menu_clone_clone_form
         '#type' => 'select',
         '#title' => t('Change language'),
         '#description' => t('You can globally change the language of <em>all</em> the available menu items.'),
@@ -80,7 +80,7 @@ function _menu_clone_tree_form($tree) {
     $item = $data['link'];
     // Don't show callbacks; these have $item['hidden'] < 0.
     if ($item && $item['hidden'] >= 0) {
-      $mlid = 'mlid:'. $item['mlid'];
+      $mlid = 'mlid:'. $item['mlid'];menu_clone_clone_form
       $form[$mlid]['#item'] = $item;
       $form[$mlid]['#attributes'] = $item['hidden'] ? array('class' => 'menu-disabled') : array('class' => 'menu-enabled');
       $form[$mlid]['title']['#value'] = l($item['title'], $item['href'], $item['localized_options']) . ($item['hidden'] ? ' ('. t('disabled') .')' : '');
@@ -296,26 +296,23 @@ function theme_menu_clone_clone_form($form) {
       }
     }
     // Add the Ignore row. The ignore row must be draggable as well to avoid
-    // situations where the ignore row is at the top of the table and no items can
-    // be dragged above it anymore.
+    // situations where the ignore row is at the top of the table and no items
+    // can be dragged above it anymore.
     // A draggable ignore row does also add the ability of simply dragging the
     // ignore row to a spot in the menu, instead of having to dragg all the
     // unnecessary elements below it.
-    // The tabledrag-root class being added, prevents the row of becoming a child
-    // of another menu item.
     $form['edit_menu']['tree']['ignore']['plid']['#attributes']['class'] = 'menu-clone-plid';
     $form['edit_menu']['tree']['ignore']['mlid']['#attributes']['class'] = 'menu-clone-mlid';
     $form['edit_menu']['tree']['ignore']['weight']['#attributes']['class'] = 'menu-clone-weight';
     $row = array();
     $row[] = array('data' => drupal_render($form['edit_menu']['tree']['ignore']['title']), 'colspan' => '3');
     $row[] = drupal_render($form['edit_menu']['tree']['ignore']['check']) . drupal_render($form['edit_menu']['tree']['ignore']['weight']) . drupal_render($form['edit_menu']['tree']['ignore']['mlid']) . drupal_render($form['edit_menu']['tree']['ignore']['plid']);
-    $rows[] = array('data' => $row, 'class' => 'draggable');// tabledrag-root');
+    $rows[] = array('data' => $row, 'class' => 'draggable');
     
     // Make sure the draggable table is rendered inside the fieldset. Having
     // trouble with this? Check the possibilities here
     // http://drupal.org/node/82916 and here http://drupal.org/node/98065. The
     // latter worked for me, others did not.
-    //$form['edit_menu']['#children'] = drupal_render($form['edit_menu']['menu_lang']);
     $form['edit_menu']['tree']['#children'] = theme('table', $header, $rows, array('id' => 'menu-clone'));
   }
   $output = drupal_render($form);
