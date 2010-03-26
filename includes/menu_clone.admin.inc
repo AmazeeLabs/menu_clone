@@ -10,7 +10,7 @@
  * TODO: See if we can improve the $form['edit_menu']['edit_tree'] field. Use
  * something else instead of 'markup'.
  */
-function menu_clone_clone_form(&$form_state, $menu){
+function menu_clone_clone_form(&$form_state, $menu) {
   $form['menu_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Menu name'),
@@ -35,7 +35,7 @@ function menu_clone_clone_form(&$form_state, $menu){
     $form['edit_menu'] = array(
       '#type' => 'fieldset',
       '#title' => t('Customise menu'),
-      '#description' => t('Be fore actually cloning the menu, you can customise it first.'),
+      '#description' => t('Before actually cloning the menu, you can customise it first.'),
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
       '#tree' => TRUE,
@@ -51,7 +51,7 @@ function menu_clone_clone_form(&$form_state, $menu){
     // Append the tree form to the fieldset.
     $form['edit_menu']['edit_tree'] = array(
       '#type' => 'markup',
-      '#value' => '<div><h2 class="fieldset-title">' .t('Edit menu') .'</h2><p>' . t('You can reorder the menu items and adjust basic settings here. Drag unwanted items below the <em>Ignore</em> line, or drag the <em>Ignore</em> line itself.') . '</p></div>',
+      '#value' => '<div class="form-item"><label>' .t('Edit menu') .':</label><div class="description">' . t('You can reorder the menu items and adjust basic settings here. Drag unwanted items below the <em>Ignore</em> row, or drag the <em>Ignore</em> row itself.') . '</div></div>',
     );
     $form['edit_menu']['tree'] = _menu_clone_tree_form($menu['tree']);
   }
@@ -118,7 +118,7 @@ function _menu_clone_tree_form($tree) {
   // properly.
   $form['ignore']['title'] = array(
     '#type' => 'markup',
-    '#value' => '<em>'.t("Ignore: the items below this line won't be cloned.").'</em>',
+    '#value' => '<strong>'.t("Ignore: the items below this row won't be cloned.").'</strong>',
   );
   $form['ignore']['check'] = array(
     '#type' => 'hidden',
@@ -171,8 +171,7 @@ function menu_clone_clone_form_validate($form, &$form_state) {
  * @see              Drupal core menu.admin.inc menu_overview_form_submit()
  * @see              Drupal core menu.admin.inc menu_edit_menu_submit()
  */
-function menu_clone_clone_form_submit($form, &$form_state){
-
+function menu_clone_clone_form_submit($form, &$form_state) {
   // Create new menu.
   // Begin code taken from _menu_overview_tree_form().
   $menu = $form_state['values'];
@@ -262,7 +261,8 @@ function theme_menu_clone_clone_form($form) {
   if (!empty($form['edit_menu'])) {
     drupal_add_tabledrag('menu-clone', 'match', 'parent', 'menu-clone-plid', 'menu-clone-plid', 'menu-clone-mlid', TRUE, MENU_MAX_DEPTH - 1);
     drupal_add_tabledrag('menu-clone', 'order', 'sibling', 'menu-clone-weight');
-  
+    drupal_add_css(drupal_get_path('module', 'menu_clone').'/css/menu_clone.css');
+
     $header = array(
       t('Menu item'),
       array('data' => t('Enabled'), 'class' => 'checkbox'),
@@ -307,7 +307,7 @@ function theme_menu_clone_clone_form($form) {
     $row = array();
     $row[] = array('data' => drupal_render($form['edit_menu']['tree']['ignore']['title']), 'colspan' => '3');
     $row[] = drupal_render($form['edit_menu']['tree']['ignore']['check']) . drupal_render($form['edit_menu']['tree']['ignore']['weight']) . drupal_render($form['edit_menu']['tree']['ignore']['mlid']) . drupal_render($form['edit_menu']['tree']['ignore']['plid']);
-    $rows[] = array('data' => $row, 'class' => 'draggable');
+    $rows[] = array('data' => $row, 'class' => 'draggable ignore');
     
     // Make sure the draggable table is rendered inside the fieldset. Having
     // trouble with this? Check the possibilities here
