@@ -46,7 +46,7 @@ function menu_clone_menu() {
     'title' => t('Clone menu'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('menu_clone_clone_form', 3),
-    'access arguments' => array('access clone menu'),
+    'access arguments' => array('access menu clone'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/menu_clone.admin.inc',
     'weight' => 20,
