@@ -15,7 +15,7 @@ function menu_clone_clone_form(&$form_state, $menu) {
     '#type' => 'textfield',
     '#title' => t('Menu name'),
     '#default_value' => $menu['menu_name'],
-    '#maxlength' => MENU_MAX_MENU_NAME_LENGTH_UI,
+    '#maxlength' => MENU_MAX_MENU_NAME_LENGTH_UI - strlen('menu-'),
     '#description' => t('The machine-readable name of this menu. This text will be used for constructing the URL of the <em>menu overview</em> page for this menu. This name must contain only lowercase letters, numbers, and hyphens, and must be unique.'),
     '#required' => TRUE,
   );
