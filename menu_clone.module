@@ -99,6 +99,7 @@ function menu_clone_load($menu_name) {
   while(!empty($result)) {
     $new_name = substr('clone' . $i . '-' . $menu['menu_name'], 0, MENU_MAX_MENU_NAME_LENGTH_UI);
     $result = db_result(db_query($sql, 'menu-' . $new_name));
+    $i++;
   }
 
   // Begin code taken from menu_overview_form().
