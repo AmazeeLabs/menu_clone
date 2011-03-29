@@ -1,4 +1,5 @@
 name = Menu Clone
 description = Allows to clone a menu and all of its items.
-core = 6.x
+core = 7.x
+dependencies[] = menu
 php = 5.2

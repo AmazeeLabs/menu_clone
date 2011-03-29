@@ -39,9 +39,9 @@ Installation
 1. Extract the 'menu_clone' module directory, including all its
    subdirectories, into your Drupal modules directory.
 
-2. Go to the Administer > Structure > Modules page, and enable the module.
+2. Go to the Modules page, and enable the module.
 
-3. Go to the Administer > User management > Permissions page, and grant 'access
+3. Go to the People > Permissions page, and grant 'access
    menu clone' permissions to the desired roles.
 
 
@@ -79,4 +79,5 @@ http://raygunrobot.com).
 
 - All developers of the Drupal core Menu module. Some code was taken from there.
 
-- Sponsored in part by Nascom (http://www.nascom.be)
+- Sponsored in part by Nascom (http://www.nascom.be), D7 port by Calibrate (http://www.calibrate.be)
+
