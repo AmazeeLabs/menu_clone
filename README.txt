@@ -79,5 +79,5 @@ http://raygunrobot.com).
 
 - All developers of the Drupal core Menu module. Some code was taken from there.
 
-- Sponsored in part by Nascom (http://www.nascom.be), D7 port by Calibrate (http://www.calibrate.be)
+- Sponsored in part by Nascom (http://www.nascom.be)
 
