@@ -97,6 +97,11 @@ function menu_clone_load($menu_name) {
     ->execute()
     ->fetchAssoc();
 
+  // No menu? Bail out triggering a 404.
+  if (empty($menu)) {
+    return FALSE;
+  }
+
   // Create a unique name
   // Remove 'menu-' prefix if there is any.
   if (strpos($menu['menu_name'], 'menu-') === 0) {
