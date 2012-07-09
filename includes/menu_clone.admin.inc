@@ -54,6 +54,10 @@ function menu_clone_clone_form($form, &$form_state, $menu) {
       '#markup' => '<div class="form-item"><label>' . t('Edit menu') . ':</label><div class="description">' . t('You can reorder the menu items and adjust basic settings here. Drag unwanted items below the <em>Ignore</em> row, or drag the <em>Ignore</em> row itself.') . '</div></div>',
     );
     module_load_include('inc', 'menu', 'menu.admin');
+    // In D6, the _menu_overview_tree_form() function also added the 'expanded'
+    // field. In D7 it has been removed from that function. If we want it back
+    // we will have to create a _menu_clone_overview_tree_form() and add an
+    // additional checkbox after $form[$mlid]['hidden'].
     $form['edit_menu']['tree'] = _menu_overview_tree_form($menu['tree']);
     _menu_clone_add_ignore_row($form['edit_menu']['tree']);
   }
