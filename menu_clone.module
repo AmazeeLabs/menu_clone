@@ -8,14 +8,14 @@ function menu_clone_help($path, $arg) {
   switch ($path) {
     case 'admin/help#menu_clone':
       $output = '<p>'. t('This module provides you with the ability to clone complete menus, much like <a href="@node_clone" rel="external">Node Clone</a> does with nodes. The module adds a <em>Clone menu</em> tab to every <a href="@detail_page">detail page</a> of a menu. Clicking on the <em>Clone menu</em> tab brings you to the <a href="@menu_clone_detail">menu clone page</a>, displaying all settings needed to properly create a clone of this menu.', array('@detail_page' => url('admin/structure/menu/manage/navigation'), '@node_clone' => 'http://drupal.org/project/node_clone', '@menu_clone_detail' => url('admin/structure/menu/manage/navigation/clone'))) .'</p>';
-      $output .= '<p>'. t('The optional <em><a href="@i18n" rel="external">Internationalization</a></em> (i18n) module together with the i18n submodule <em>Menu translation</em> will activate additional Language options.', array('@i18n' => 'http://drupal.org/project/i18n')) .'</p>';
+      $output .= '<p>'. t('The optional <em><a href="@i18n" rel="external">Internationalization</a></em> (i18n) module together with the i18n submodule <em>Menu translation</em> will activate additional Language options. The <em>multilingual options</em> of the cloned menu will be set to <em>Translate and Localize</em>.', array('@i18n' => 'http://drupal.org/project/i18n')) .'</p>';
       $output .= '<p>'. t('The module provides inline help topics. For further info, read the help on the <a href="@menu_clone">menu clone page</a>.', array('@menu_clone' => url('admin/structure/menu/manage/navigation/clone'))) .'</p>';
       break;
     case 'admin/structure/menu/manage/%/clone':
       $output = '<p>'. t('Next to the basic menu properties such as <em>Menu name</em>, <em>Title</em> and <em>Description</em>, this form allows you to customise the menu itself before cloning it.') .'</p>';
       $output .= '<p>';
-      $output .= t('The optional <em><a href="@i18n" rel="external">Internationalization</a></em> (i18n) module together with the i18n submodule <em>Menu translation</em> will activate the <em>Change language</em> option. This select box allows you to change the language of <em>all</em> menu items during the cloning process.', array('@i18n' => 'http://drupal.org/project/i18n'));
-      if (module_exists('i18n') && !module_exists('i18nmenu')) {
+      $output .= t('The optional <em><a href="@i18n" rel="external">Internationalization</a></em> (i18n) module together with the i18n submodule <em>Menu translation</em> will activate the <em>Change language</em> option. This select box allows you to change the language of <em>all</em> menu items during the cloning process. The <em>multilingual options</em> of the cloned menu will be set to <em>Translate and Localize</em>.', array('@i18n' => 'http://drupal.org/project/i18n'));
+      if (module_exists('i18n') && !module_exists('i18n_menu')) {
         $output .= '<br />'. t('<strong>NOTE</strong>: You <em>do</em> have the <em><a href="@i18n" rel="external">Internationalization</a></em> module installed, but the <em>Menu translation</em> submodule is not enabled. You can enable it on the <a href="@modules">modules page</a>.', array('@i18n' => 'http://drupal.org/project/i18n', '@modules' => url('admin/modules')));
       }
       else if(!module_exists('i18n')) {

@@ -135,6 +135,9 @@ function menu_clone_clone_form_submit($form, &$form_state) {
   // Create new menu.
   // Begin code taken from menu_edit_menu_submit().
   $menu = $form_state['values'];
+  if (isset($menu['edit_menu']['menu_lang']) && !empty($menu['edit_menu']['menu_lang'])) {
+    $menu['i18n_mode'] = I18N_MODE_MULTIPLE;
+  }
   $path = 'admin/structure/menu/manage/';
   // Add 'menu-' to the menu name to help avoid name-space conflicts.
   $menu['menu_name'] = 'menu-' . $menu['menu_name'];
@@ -177,7 +180,7 @@ function menu_clone_clone_form_submit($form, &$form_state) {
           $element['#item'][$field] = $element[$field]['#value'];
         }
         if (isset($menu['edit_menu']['menu_lang']) && !empty($menu['edit_menu']['menu_lang'])) {
-          $element['#item']['options']['langcode'] = $menu['edit_menu']['menu_lang'];
+          $element['#item']['language'] = $menu['edit_menu']['menu_lang'];
         }
         // Hidden is a special case, the value needs to be reversed.
         // Convert to integer rather than boolean due to PDO cast to string.
