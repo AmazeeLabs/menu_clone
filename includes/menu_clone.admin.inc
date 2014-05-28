@@ -2,12 +2,12 @@
 
 /**
  * Create the clone form.
- * 
+ *
  * @param form        the form
  * @param form_state  reference to the state of the form
  * @param menu        the menu object received from hook_load()
  * @see               menu_clone_load()
- * 
+ *
  * TODO: See if we can improve the $form['edit_menu']['edit_tree'] field. Use
  * something else instead of 'markup'.
  */
@@ -47,6 +47,11 @@ function menu_clone_clone_form($form, &$form_state, $menu) {
         '#title' => t('Change language'),
         '#description' => t('You can globally change the language of <em>all</em> the available menu items.'),
         '#options' => array_merge(array('' => t('No change')), i18n_language_list()),
+      );
+      $form['edit_menu']['menu_translation'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Make this a translation of the original menu'),
+        '#description' => t('If this menu will have a language, then all the items will be set also as translations of the items in the original menu.'),
       );
     }
     // Append the tree form to the fieldset.
@@ -100,7 +105,7 @@ function _menu_clone_add_ignore_row(&$form) {
 
 /**
  * Validation function for menu_clone_cone_form().
- * 
+ *
  * @param form       the form object
  * @param form_state reference to the form state
  * @see              menu_clone_cone_form()
@@ -124,7 +129,7 @@ function menu_clone_clone_form_validate($form, &$form_state) {
 /**
  * Submit function for menu_clone_cone_form(). Parts were taken from the Drupal
  * core Menu module.
- * 
+ *
  * @param form       the form object
  * @param form_state reference to the form state
  * @see              menu_clone_cone_form()
@@ -175,6 +180,8 @@ function menu_clone_clone_form_submit($form, &$form_state) {
     foreach (element_children($form['edit_menu']['tree']) as $mlid) {
       if (isset($form['edit_menu']['tree'][$mlid]['#item'])) {
         $element = $form['edit_menu']['tree'][$mlid];
+        // Store the original item, we need it later.
+        $original_menu_item = $element['#item'];
         // Update any fields that might have changed in this menu item.
         foreach ($fields as $field) {
           $element['#item'][$field] = $element[$field]['#value'];
@@ -190,6 +197,18 @@ function menu_clone_clone_form_submit($form, &$form_state) {
         $element['#item']['menu_name'] = $menu['menu_name'];
         $element['#item']['mlid'] = NULL;
         $element['#item']['module'] = 'menu';
+        // Check the translation settings.
+        if (!empty($menu['edit_menu']['menu_translation'])) {
+          if (!empty($original_menu_item['i18n_tsid'])) {
+            $translation_set = i18n_translation_set_load($original_menu_item['i18n_tsid']);
+          }
+          else {
+            // Create object and stick the source information in the translation set.
+            $translation_set = i18n_translation_set_build('menu_link')
+              ->add_item($original_menu_item);
+          }
+          $element['#item']['translation_set'] = $translation_set;
+        }
         $menu_items[$mlid] = $element['#item'];
       }
       else if (isset($form['edit_menu']['tree'][$mlid]['check'])) {
@@ -224,7 +243,7 @@ function menu_clone_clone_form_submit($form, &$form_state) {
 /**
  * Theme the menu tree of the clone form into a table and display it inside its
  * proper fieldset.
- * 
+ *
  * @param form  The form array to be themed
  * @see         menu_clone_clone_form()
  * @ingroup     themeable
