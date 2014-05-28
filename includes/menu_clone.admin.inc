@@ -53,6 +53,10 @@ function menu_clone_clone_form($form, &$form_state, $menu) {
         '#title' => t('Make this a translation of the original menu'),
         '#description' => t('If this menu will have a language, then all the items will be set also as translations of the items in the original menu.'),
       );
+      $form['edit_menu']['clone_localization'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Clone localization'),
+      );
     }
     // Append the tree form to the fieldset.
     $form['edit_menu']['edit_tree'] = array(
@@ -140,7 +144,7 @@ function menu_clone_clone_form_submit($form, &$form_state) {
   // Create new menu.
   // Begin code taken from menu_edit_menu_submit().
   $menu = $form_state['values'];
-  if (isset($menu['edit_menu']['menu_lang']) && !empty($menu['edit_menu']['menu_lang'])) {
+  if (isset($menu['edit_menu']['menu_lang']) && !empty($menu['edit_menu']['menu_lang']) || !empty($menu['edit_menu']['clone_localization'])) {
     $menu['i18n_mode'] = I18N_MODE_MULTIPLE;
   }
   $path = 'admin/structure/menu/manage/';
@@ -182,6 +186,7 @@ function menu_clone_clone_form_submit($form, &$form_state) {
         $element = $form['edit_menu']['tree'][$mlid];
         // Store the original item, we need it later.
         $original_menu_item = $element['#item'];
+        $element['#item']['original_mlid'] = $original_menu_item['mlid'];
         // Update any fields that might have changed in this menu item.
         foreach ($fields as $field) {
           $element['#item'][$field] = $element[$field]['#value'];
@@ -234,6 +239,22 @@ function menu_clone_clone_form_submit($form, &$form_state) {
       $item['customized'] = 1;
 
       $new_mlid = menu_link_save($item);
+      // Clone also the localization of the menu item.
+      if ($menu['edit_menu']['clone_localization']) {
+        $string = i18n_string_load_multiple(array('textgroup' => 'menu', 'context' => 'item:' . $item['original_mlid'] . ':title'));
+        $string = reset($string);
+        foreach (i18n_language_list() as $lang_code => $value) {
+          $tr = i18n_string_translate('menu:item:' . $item['original_mlid'] . ':title', $string->source, array('langcode' => $lang_code));
+          // If the source string is identical with the translation string, then
+          // we do not update the translation.
+          // @todo: this has the side effect that in the case when we have the
+          // exact same translation, the translation will not be created, but
+          // this should be harmless.
+          if (!empty($tr) && $tr !== $string->source) {
+            i18n_string_translation_update('menu:item:' . $new_mlid . ':title', $tr, $lang_code);
+          }
+        }
+      }
     }
   }
 
