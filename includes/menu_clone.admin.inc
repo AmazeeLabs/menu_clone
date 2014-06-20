@@ -244,7 +244,7 @@ function menu_clone_clone_form_submit($form, &$form_state) {
         $string = i18n_string_load_multiple(array('textgroup' => 'menu', 'context' => 'item:' . $item['original_mlid'] . ':title'));
         $string = reset($string);
         foreach (i18n_language_list() as $lang_code => $value) {
-          $tr = i18n_string_translate('menu:item:' . $item['original_mlid'] . ':title', $string->source, array('langcode' => $lang_code));
+          $tr = i18n_string_translate('menu:item:' . $item['original_mlid'] . ':title', $string->source, array('langcode' => $lang_code, 'sanitize' => FALSE));
           // If the source string is identical with the translation string, then
           // we do not update the translation.
           // @todo: this has the side effect that in the case when we have the
